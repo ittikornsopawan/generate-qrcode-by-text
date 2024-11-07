@@ -6,24 +6,24 @@ function App() {
   const [qrValue, setQrValue] = useState('');
   const qrRef = useRef(null);
 
-  // Handle text input change
   const handleTextChange = (e) => {
     setText(e.target.value);
-    setQrValue(e.target.value); // Update QR code with new text or URL
+    setQrValue(e.target.value);
   };
 
-  // Copy QR code to clipboard
-  const copyToClipboard = async () => {
+  const downloadQRCode = async () => {
     if (qrRef.current) {
       try {
         const canvas = qrRef.current.querySelector('canvas');
-        const blob = await new Promise((resolve) => canvas.toBlob(resolve));
-        const item = new ClipboardItem({ 'image/png': blob });
-        await navigator.clipboard.write([item]);
-        alert('QR code copied to clipboard!');
+        const dataUrl = canvas.toDataURL('image/png');
+
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = 'qr-code.png';
+        link.click();
       } catch (error) {
-        console.error('Failed to copy QR code: ', error);
-        alert('Failed to copy QR code. Please try again.');
+        console.error('Failed to download QR code: ', error);
+        alert('Failed to download QR code. Please try again.');
       }
     }
   };
@@ -34,7 +34,7 @@ function App() {
 
       <div style={{ marginBottom: '20px' }}>
         <label>
-          Enter PDF URL or Text:
+          Enter Text:
           <input
             type="text"
             value={text}
@@ -50,15 +50,15 @@ function App() {
         <div ref={qrRef}>
           {qrValue && (
             <QRCodeCanvas
-              value={qrValue} // This will be the PDF URL or any text you entered
+              value={qrValue}
               size={256}
               renderAs="canvas"
             />
           )}
         </div>
         {qrValue && (
-          <button onClick={copyToClipboard} style={{ marginTop: '20px' }}>
-            Copy QR Code to Clipboard
+          <button onClick={downloadQRCode} style={{ marginTop: '20px' }}>
+            Download QR Code Image
           </button>
         )}
       </div>
